@@ -5,9 +5,10 @@ import java.util.Scanner;
 public class Test {
 
 	public static void main(String[] args) {
-		testLCG();
-		testHC1();
-		testHC1SecureRandom();
+		// testLCG();
+		// testHC1();
+		// testHC1SecureRandom();
+		testTripleDES();
 	}
 
 	public static void testLCG() {
@@ -29,7 +30,7 @@ public class Test {
 		String fileIn = scanner.nextLine();
 		System.out.println("Speicherort: ");
 		String fileOut = scanner.nextLine();
-		
+
 		try {
 			new HC1().encryptLCG(start, fileIn, fileOut);
 		} catch (FileNotFoundException e) {
@@ -39,7 +40,7 @@ public class Test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	public static void testHC1SecureRandom() {
@@ -52,7 +53,7 @@ public class Test {
 		String fileIn = scanner.nextLine();
 		System.out.println("Speicherort: ");
 		String fileOut = scanner.nextLine();
-		
+
 		try {
 			new HC1().encryptSecureRandom(start, fileIn, fileOut);
 		} catch (FileNotFoundException e) {
@@ -62,7 +63,7 @@ public class Test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	public static void testTripleDES() {
@@ -76,7 +77,18 @@ public class Test {
 		String fileOut = scanner.nextLine();
 		System.out.println("Statusstring (encrypt|decrypt): ");
 		String status = scanner.nextLine();
-		
-		
+		try {
+			if (status.equals("encrypt")) {
+				new TripleDES().tripleEncrypt(fileIn, keyFile, fileOut);
+			} else {
+				new TripleDES().tripleDecrypt(fileIn, keyFile, fileOut);
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
