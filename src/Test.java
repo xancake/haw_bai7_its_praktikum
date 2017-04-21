@@ -1,5 +1,7 @@
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Scanner;
 
 public class Test {
@@ -78,15 +80,22 @@ public class Test {
 		System.out.println("Statusstring (encrypt|decrypt): ");
 		String status = scanner.nextLine();
 		try {
+			File fKey = new File(ClassLoader.getSystemClassLoader().getResource(keyFile).toURI());
+			File fIn = new File(ClassLoader.getSystemClassLoader().getResource(fileIn).toURI());
+			File fOut = new File(fileOut);
+			TripleDES trippleDes = TripleDES.createFromKeyFile(fKey);
 			if (status.equals("encrypt")) {
-				new TripleDES().tripleEncrypt(fileIn, keyFile, fileOut);
+				trippleDes.encrypt(fIn, fOut);
 			} else {
-				new TripleDES().tripleDecrypt(fileIn, keyFile, fileOut);
+				trippleDes.decrypt(fIn, fOut);
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

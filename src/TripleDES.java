@@ -1,126 +1,105 @@
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class TripleDES {
-
-	public void tripleEncrypt(String fileIn, String keyFile, String fileOut) throws FileNotFoundException, IOException {
-
-		try (InputStream is = new BufferedInputStream(new FileInputStream(fileIn));
-				OutputStream os = new BufferedOutputStream(new FileOutputStream(fileOut));
-				InputStream keyIs = new BufferedInputStream(new FileInputStream(keyFile))) {
+	private final byte[] _key1;
+	private final byte[] _key2;
+	private final byte[] _key3;
+	private final byte[] _initial;
+	
+	public TripleDES(byte[] key1, byte[] key2, byte[] key3, byte[] initial) {
+		_key1 = Arrays.copyOf(key1, key1.length);
+		_key2 = Arrays.copyOf(key2, key1.length);
+		_key3 = Arrays.copyOf(key3, key1.length);
+		_initial = Arrays.copyOf(initial, key1.length);
+	}
+	
+	public static TripleDES createFromKeyFile(File keyFile) throws FileNotFoundException, IOException {
+		try (InputStream is = new BufferedInputStream(new FileInputStream(keyFile))) {
 			byte[] key1 = new byte[8];
 			byte[] key2 = new byte[8];
 			byte[] key3 = new byte[8];
 			byte[] initial = new byte[8];
-
-			keyIs.read(key1, 0, 8);
-			keyIs.read(key2, 0, 8);
-			keyIs.read(key3, 0, 8);
-			keyIs.read(initial, 0, 8);
-
-			byte[] buffer = new byte[8];
-			int length;
-			List<byte[]> temp = new ArrayList<>();
-
-			byte[] cipher = Arrays.copyOf(initial, initial.length);
-			while ((length = is.read(buffer)) != -1) {
-				cipher = encryptCFB(buffer, length, new DES(key1), cipher);
-				temp.add(cipher);
-			}
-
-			List<byte[]> temp2 = new ArrayList<>();
-			cipher = Arrays.copyOf(initial, initial.length);
-			for (byte[] bs : temp) {
-				bs = decryptCFB(bs, bs.length, new DES(key2), cipher);
-				temp2.add(bs);
-			}
-
-			cipher = Arrays.copyOf(initial, initial.length);
-			for (byte[] bs : temp2) {
-				bs = encryptCFB(bs, bs.length, new DES(key3), cipher);
-				os.write(bs, 0, bs.length);
-			}
-
+			
+			is.read(key1, 0, 8);
+			is.read(key2, 0, 8);
+			is.read(key3, 0, 8);
+			is.read(initial, 0, 8);
+			
+			return new TripleDES(key1, key2, key3, initial);
 		}
 	}
 
-	public void tripleDecrypt(String fileIn, String keyFile, String fileOut) throws FileNotFoundException, IOException {
+	public void encrypt(File fileIn, File fileOut) throws FileNotFoundException, IOException {
+		if(!fileIn.exists()) {
+			throw new FileNotFoundException("Die Eingabe-Datei existiert nicht: " + fileIn.getAbsolutePath());
+		}
+		if(fileOut.exists()) {
+			throw new IOException("Die Ausgabe-Datei existiert bereits: " + fileOut.getAbsolutePath());
+		}
+		
+		File temp1 = File.createTempFile("haw_bai7_its_3des_step1", null);
+		File temp2 = File.createTempFile("haw_bai7_its_3des_step2", null);
+		encryptSingle(_key1, fileIn, temp1);
+		decryptSingle(_key2, temp1, temp2);
+		encryptSingle(_key3, temp2, fileOut);
+		temp1.delete();
+		temp2.delete();
+	}
 
-		try (InputStream is = new BufferedInputStream(new FileInputStream(fileIn));
+	public void decrypt(File fileIn, File fileOut) throws FileNotFoundException, IOException {
+		encrypt(fileIn, fileOut);
+	}
+	
+	private void encryptSingle(byte[] key, File fileIn, File fileOut) throws FileNotFoundException, IOException {
+		try (
+				InputStream is = new BufferedInputStream(new FileInputStream(fileIn));
 				OutputStream os = new BufferedOutputStream(new FileOutputStream(fileOut));
-				InputStream keyIs = new BufferedInputStream(new FileInputStream(keyFile))) {
-			byte[] key1 = new byte[8];
-			byte[] key2 = new byte[8];
-			byte[] key3 = new byte[8];
-			byte[] initial = new byte[8];
-
-			keyIs.read(key1, 0, 8);
-			keyIs.read(key2, 0, 8);
-			keyIs.read(key3, 0, 8);
-			keyIs.read(initial, 0, 8);
-
+		) {
+			DES des = new DES(key);
+			
 			byte[] buffer = new byte[8];
-			int length;
-
-			List<byte[]> temp = new ArrayList<>();
-			byte[] cipher = Arrays.copyOf(initial, initial.length);
-			byte[] plain = new byte[8];
-			DES des1 = new DES(key1);
-			while ((length = is.read(buffer)) != -1) {
-				plain = Arrays.copyOf(encryptCFB(buffer, length, des1, cipher), length);
-				temp.add(plain);
-				cipher = Arrays.copyOf(buffer, length);
+			byte[] cipher = Arrays.copyOf(_initial, _initial.length);
+			int len;
+			while((len=is.read(buffer)) != -1) {
+				byte[] bce = new byte[8];
+				des.encrypt(cipher, 0, bce, 0);
+				for(int i=0; i<bce.length; i++) {
+					cipher[i] = (byte)(bce[i] ^ buffer[i]);
+				}
+				os.write(cipher);
 			}
-
-			DES des2 = new DES(key2);
-			List<byte[]> temp2 = new ArrayList<>();
-			cipher = Arrays.copyOf(initial, initial.length);
-			for (byte[] bs : temp) {
-				plain = Arrays.copyOf(decryptCFB(bs, bs.length, des2, cipher), bs.length);
-				temp2.add(plain);
-				cipher = Arrays.copyOf(bs, bs.length);
-
-			}
-
-			DES des3 = new DES(key3);
-			cipher = Arrays.copyOf(initial, initial.length);
-			for (byte[] bs : temp2) {
-				plain = Arrays.copyOf(encryptCFB(bs, bs.length, des3, cipher), bs.length);
-				cipher = Arrays.copyOf(bs, bs.length);
-				os.write(plain, 0, plain.length);
-			}
-
 		}
 	}
-
-	public byte[] encryptCFB(byte[] message, int length, DES des, byte[] cipher) {
-		byte[] bce = new byte[8];
-
-		des.encrypt(cipher, 0, bce, 0);
-		for (int i = 0; i < cipher.length; i++) {
-			cipher[i] = (byte) (message[i] ^ bce[i]);
+	
+	private void decryptSingle(byte[] key, File fileIn, File fileOut) throws FileNotFoundException, IOException {
+		try (
+				InputStream is = new BufferedInputStream(new FileInputStream(fileIn));
+				OutputStream os = new BufferedOutputStream(new FileOutputStream(fileOut));
+		) {
+			DES des = new DES(key);
+			
+			byte[] buffer = new byte[8];
+			byte[] cipher = Arrays.copyOf(_initial, _initial.length);
+			int len;
+			while((len=is.read(buffer)) != -1) {
+				byte[] bce = new byte[8];
+				byte[] plain = new byte[8];
+				des.encrypt(cipher, 0, bce, 0);
+				for(int i=0; i<bce.length; i++) {
+					plain[i] = (byte)(bce[i] ^ buffer[i]);
+				}
+				cipher = buffer;
+				os.write(plain);
+			}
 		}
-
-		return cipher;
-	}
-
-	public byte[] decryptCFB(byte[] message, int length, DES des, byte[] cipher) {
-		byte[] bce = new byte[8];
-
-		des.decrypt(cipher, 0, bce, 0);
-		for (int i = 0; i < cipher.length; i++) {
-			cipher[i] = (byte) (message[i] ^ bce[i]);
-		}
-
-		return cipher;
 	}
 }
