@@ -1,1 +1,0 @@
-# haw_bai7_its_praktikum

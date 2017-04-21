@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class TripleDES {
 	private final byte[] _key1;
@@ -76,6 +77,7 @@ public class TripleDES {
 					cipher[i] = (byte)(bce[i] ^ buffer[i]);
 				}
 				os.write(cipher);
+				buffer = new byte[8];
 			}
 		}
 	}
@@ -99,7 +101,54 @@ public class TripleDES {
 				}
 				cipher = buffer;
 				os.write(plain);
+				buffer = new byte[8];
 			}
 		}
+	}
+	
+	public static void main(String... args) throws Exception {
+		String keyFileStr = null;
+		String inputFileStr = null;
+		String outputFileStr = null;
+		switch(args.length) {
+			case 0: {
+				Scanner keyboard = new Scanner(System.in);
+				System.out.print("Key-File: ");
+				keyFileStr = keyboard.nextLine();
+				System.out.print("Input-File: ");
+				inputFileStr = keyboard.nextLine();
+				System.out.print("Output-File: ");
+				outputFileStr = keyboard.nextLine();
+				keyboard.close();
+				break;
+			}
+			case 1: {
+				if("default".equals(args[0])) {
+					keyFileStr = "3DESTest.key";
+					inputFileStr  = "3DESTest.enc";
+					outputFileStr = "3DESTest.pdf";
+				} else {
+					System.out.println("Usage: TripleDES <keyFile> <inputFile> <outputFile>");
+					System.exit(1);
+				}
+				break;
+			}
+			case 3: {
+				keyFileStr    = args[0];
+				inputFileStr  = args[1];
+				outputFileStr = args[2];
+				break;
+			}
+			default: {
+				System.out.println("Usage: TripleDES <keyFile> <inputFile> <outputFile>");
+				System.exit(1);
+			}
+		}
+		
+		File keyFile    = new File(ClassLoader.getSystemClassLoader().getResource(keyFileStr).toURI());
+		File inputFile  = new File(ClassLoader.getSystemClassLoader().getResource(inputFileStr).toURI());
+		File outputFile = new File(outputFileStr);
+		TripleDES tripleDES = TripleDES.createFromKeyFile(keyFile);
+		tripleDES.encrypt(inputFile, outputFile);
 	}
 }
