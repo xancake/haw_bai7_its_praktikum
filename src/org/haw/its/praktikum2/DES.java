@@ -449,4 +449,54 @@ public class DES
 			a = a >>> 8;
 		}
 	}
+	
+	public static void main(String... args) {
+		DES des = new DES();
+		String message = "12345678";
+		
+		byte[] enc = new byte[8];
+		byte[] dec = new byte[8];
+		byte[] enc_enc = new byte[8];
+		byte[] enc_dec = new byte[8];
+		byte[] dec_enc = new byte[8];
+		byte[] dec_dec = new byte[8];
+		des.encrypt(message.getBytes(), 0, enc, 0);
+		des.decrypt(message.getBytes(), 0, dec, 0);
+		des.encrypt(enc, 0, enc_enc, 0);
+		des.decrypt(enc, 0, enc_dec, 0);
+		des.encrypt(dec, 0, dec_enc, 0);
+		des.decrypt(dec, 0, dec_dec, 0);
+		
+		System.out.println("===== CLEAR TEXT =====");
+		System.out.println("Message: " + message);
+		System.out.println("enc: '" + new String(enc) + "', enc_enc: '" + new String(enc_enc) + "', enc_dec: '" + new String(enc_dec) + "'");
+		System.out.println("dec: '" + new String(dec) + "', dec_enc: '" + new String(dec_enc) + "', dec_dec: '" + new String(dec_dec) + "'");
+		System.out.println();
+		
+		System.out.println("===== BYTE REPRESENTATION =====");
+		System.out.print("Message: ");
+		printBytesHexa(message.getBytes());
+		System.out.println();
+		printBytes("enc", enc, enc_enc, enc_dec);
+		printBytes("dec", dec, dec_enc, dec_dec);
+	}
+	
+	private static void printBytes(String mode, byte[] bytes, byte[] enc, byte[] dec) {
+		System.out.print(mode + ": '");
+		printBytesHexa(bytes);
+		System.out.print("', " + mode + "_enc: '");
+		printBytesHexa(enc);
+		System.out.print("', " + mode + "_dec: '");
+		printBytesHexa(dec);
+		System.out.println("'");
+	}
+	
+	private static void printBytesHexa(byte[] bytes) {
+		for(int i=0; i<bytes.length; i++) {
+			System.out.printf("%02x", bytes[i]);
+			if(i<bytes.length-1) {
+				System.out.print(" ");
+			}
+		}
+	}
 }
