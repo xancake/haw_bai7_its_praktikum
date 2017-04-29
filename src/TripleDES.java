@@ -128,7 +128,7 @@ public class TripleDES {
 					inputFileStr  = "3DESTest.enc";
 					outputFileStr = "3DESTest.pdf";
 				} else {
-					System.out.println("Usage: TripleDES <keyFile> <inputFile> <outputFile>");
+					System.out.println("Usage: TripleDES [{keyFile} {inputFile} {outputFile}]");
 					System.exit(1);
 				}
 				break;
@@ -140,7 +140,7 @@ public class TripleDES {
 				break;
 			}
 			default: {
-				System.out.println("Usage: TripleDES <keyFile> <inputFile> <outputFile>");
+				System.out.println("Usage: TripleDES [{keyFile} {inputFile} {outputFile}]");
 				System.exit(1);
 			}
 		}
