@@ -1,3 +1,4 @@
+package org.haw.its.praktikum2;
 // Copyright (C) 1998-2001 Logi Ragnarsson
 
 import java.util.Random;

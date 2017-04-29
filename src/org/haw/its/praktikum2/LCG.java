@@ -1,3 +1,4 @@
+package org.haw.its.praktikum2;
 
 public class LCG {
 	private long _x;

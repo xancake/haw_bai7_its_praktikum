@@ -1,3 +1,4 @@
+package org.haw.its.praktikum2;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
