@@ -44,44 +44,22 @@ public class TripleDES {
 		if(!fileIn.exists()) {
 			throw new FileNotFoundException("Die Eingabe-Datei existiert nicht: " + fileIn.getAbsolutePath());
 		}
-		
-		File temp1 = File.createTempFile("haw_bai7_its_3des_step1", null);
-		File temp2 = File.createTempFile("haw_bai7_its_3des_step2", null);
-		encryptSingle(_key1, fileIn, temp1,   DESAction.ENCRYPT);
-		encryptSingle(_key2, temp1,  temp2,   DESAction.DECRYPT);
-		encryptSingle(_key3, temp2,  fileOut, DESAction.ENCRYPT);
-		temp1.delete();
-		temp2.delete();
-	}
-	
-	public void decrypt(File fileIn, File fileOut) throws FileNotFoundException, IOException {
-		if(!fileIn.exists()) {
-			throw new FileNotFoundException("Die Eingabe-Datei existiert nicht: " + fileIn.getAbsolutePath());
-		}
-		
-		File temp1 = File.createTempFile("haw_bai7_its_3des_step1", null);
-		File temp2 = File.createTempFile("haw_bai7_its_3des_step2", null);
-		decryptSingle(_key1, fileIn, temp1,   DESAction.ENCRYPT);
-		decryptSingle(_key2, temp1,  temp2,   DESAction.DECRYPT);
-		decryptSingle(_key3, temp2,  fileOut, DESAction.ENCRYPT);
-		temp1.delete();
-		temp2.delete();
-	}
-	
-	private void encryptSingle(byte[] key, File fileIn, File fileOut, DESAction action) throws FileNotFoundException, IOException {
 		try (
 				InputStream is = new BufferedInputStream(new FileInputStream(fileIn));
 				OutputStream os = new BufferedOutputStream(new FileOutputStream(fileOut));
 		) {
-			DES des = new DES(key);
+			DES des1 = new DES(_key1);
+			DES des2 = new DES(_key2);
+			DES des3 = new DES(_key3);
 			
 			byte[] plain = new byte[8];
 			byte[] cipher = Arrays.copyOf(_initial, _initial.length);
 			byte[] bce = new byte[8];
 			int len;
 			while((len=is.read(plain)) != -1) {
-				action.crypt(des, cipher, bce);
-//				des.encrypt(cipher, 0, bce, 0);
+				des1.encrypt(cipher, 0, bce, 0);
+				des2.decrypt(bce, 0, bce, 0);
+				des3.encrypt(bce, 0, bce, 0);
 				cipher = xor(bce, plain);
 				os.write(cipher);
 				plain = new byte[8];
@@ -89,12 +67,17 @@ public class TripleDES {
 		}
 	}
 	
-	private void decryptSingle(byte[] key, File fileIn, File fileOut, DESAction action) throws FileNotFoundException, IOException {
+	public void decrypt(File fileIn, File fileOut) throws FileNotFoundException, IOException {
+		if(!fileIn.exists()) {
+			throw new FileNotFoundException("Die Eingabe-Datei existiert nicht: " + fileIn.getAbsolutePath());
+		}
 		try (
 				InputStream is = new BufferedInputStream(new FileInputStream(fileIn));
 				OutputStream os = new BufferedOutputStream(new FileOutputStream(fileOut));
 		) {
-			DES des = new DES(key);
+			DES des1 = new DES(_key1);
+			DES des2 = new DES(_key2);
+			DES des3 = new DES(_key3);
 			
 			byte[] buffer = new byte[8];
 			byte[] cipher = Arrays.copyOf(_initial, _initial.length);
@@ -102,8 +85,9 @@ public class TripleDES {
 			byte[] plain = new byte[8];
 			int len;
 			while((len=is.read(buffer)) != -1) {
-				action.crypt(des, cipher, bce);
-//				des.decrypt(cipher, 0, bce, 0);
+				des1.encrypt(cipher, 0, bce, 0);
+				des2.decrypt(bce, 0, bce, 0);
+				des3.encrypt(bce, 0, bce, 0);
 				plain = xor(bce, buffer);
 				cipher = buffer;
 				os.write(plain);
@@ -123,28 +107,11 @@ public class TripleDES {
 		return out;
 	}
 	
-	private enum DESAction {
-		ENCRYPT {
-			@Override
-			public void crypt(DES des, byte[] in, byte[] out) {
-				des.encrypt(in, 0, out, 0);
-			}
-		},
-		DECRYPT {
-			@Override
-			public void crypt(DES des, byte[] in, byte[] out) {
-				des.decrypt(in, 0, out, 0);
-			}
-		};
-		
-		public abstract void crypt(DES des, byte[] in, byte[] out);
-	}
-	
 	public static void main(String... args) throws Exception {
 		String keyFileStr = null;
 		String inputFileStr = null;
 		String outputFileStr = null;
-		boolean encrypt = true;
+		String encrypt = null;
 		switch(args.length) {
 			case 0: {
 				Scanner keyboard = new Scanner(System.in);
@@ -155,7 +122,7 @@ public class TripleDES {
 				System.out.print("Output-File: ");
 				outputFileStr = keyboard.nextLine();
 				System.out.print("encrypt/decrypt: ");
-				encrypt = "encrypt".equals(keyboard.nextLine());
+				encrypt = keyboard.nextLine();
 				keyboard.close();
 				break;
 			}
@@ -164,26 +131,29 @@ public class TripleDES {
 					keyFileStr    = "3DESTest.key";
 					inputFileStr  = "3DESTest.enc";
 					outputFileStr = "3DESTest.pdf";
+					encrypt       = "encrypt";
 				} else {
-					System.out.println("Usage: TripleDES [{keyFile} {inputFile} {outputFile}]");
+					System.out.println("Usage: TripleDES [[<keyFile>] {<inputFile>} {<outputFile>} {encrypt|decrypt}]");
 					System.exit(1);
 				}
 				break;
 			}
-			case 2: {
+			case 3: {
 				keyFileStr    = "3DESTest.key";
 				inputFileStr  = args[0];
 				outputFileStr = args[1];
+				encrypt       = args[2];
 				break;
 			}
-			case 3: {
+			case 4: {
 				keyFileStr    = args[0];
 				inputFileStr  = args[1];
 				outputFileStr = args[2];
+				encrypt       = args[3];
 				break;
 			}
 			default: {
-				System.out.println("Usage: TripleDES [[keyFile] {inputFile} {outputFile}]");
+				System.out.println("Usage: TripleDES [[<keyFile>] {<inputFile>} {<outputFile>} {encrypt|decrypt}]");
 				System.exit(1);
 			}
 		}
@@ -192,7 +162,7 @@ public class TripleDES {
 		File inputFile  = new File(ClassLoader.getSystemClassLoader().getResource(inputFileStr).toURI());
 		File outputFile = new File(outputFileStr);
 		TripleDES tripleDES = TripleDES.createFromKeyFile(keyFile);
-		if(encrypt) {
+		if("encrypt".equals(encrypt)) {
 			tripleDES.encrypt(inputFile, outputFile);
 		} else {
 			tripleDES.decrypt(inputFile, outputFile);
