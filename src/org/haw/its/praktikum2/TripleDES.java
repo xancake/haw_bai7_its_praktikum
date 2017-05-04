@@ -55,8 +55,7 @@ public class TripleDES {
 			byte[] plain = new byte[8];
 			byte[] cipher = Arrays.copyOf(_initial, _initial.length);
 			byte[] bce = new byte[8];
-			int len;
-			while((len=is.read(plain)) != -1) {
+			while(is.read(plain) != -1) {
 				des1.encrypt(cipher, 0, bce, 0);
 				des2.decrypt(bce, 0, bce, 0);
 				des3.encrypt(bce, 0, bce, 0);
@@ -83,8 +82,7 @@ public class TripleDES {
 			byte[] cipher = Arrays.copyOf(_initial, _initial.length);
 			byte[] bce = new byte[8];
 			byte[] plain = new byte[8];
-			int len;
-			while((len=is.read(buffer)) != -1) {
+			while(is.read(buffer) != -1) {
 				des1.encrypt(cipher, 0, bce, 0);
 				des2.decrypt(bce, 0, bce, 0);
 				des3.encrypt(bce, 0, bce, 0);
