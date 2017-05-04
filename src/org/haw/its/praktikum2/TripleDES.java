@@ -12,15 +12,15 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class TripleDES {
-	private final byte[] _key1;
-	private final byte[] _key2;
-	private final byte[] _key3;
+	private final DES _des1;
+	private final DES _des2;
+	private final DES _des3;
 	private final byte[] _initial;
 	
 	public TripleDES(byte[] key1, byte[] key2, byte[] key3, byte[] initial) {
-		_key1    = Arrays.copyOf(key1,    key1.length);
-		_key2    = Arrays.copyOf(key2,    key2.length);
-		_key3    = Arrays.copyOf(key3,    key3.length);
+		_des1    = new DES(Arrays.copyOf(key1, key1.length));
+		_des2    = new DES(Arrays.copyOf(key2, key2.length));
+		_des3    = new DES(Arrays.copyOf(key3, key3.length));
 		_initial = Arrays.copyOf(initial, initial.length);
 	}
 	
@@ -48,20 +48,14 @@ public class TripleDES {
 				InputStream is = new BufferedInputStream(new FileInputStream(fileIn));
 				OutputStream os = new BufferedOutputStream(new FileOutputStream(fileOut));
 		) {
-			DES des1 = new DES(_key1);
-			DES des2 = new DES(_key2);
-			DES des3 = new DES(_key3);
-			
 			byte[] plain = new byte[8];
 			byte[] cipher = Arrays.copyOf(_initial, _initial.length);
 			byte[] bce = new byte[8];
 			while(is.read(plain) != -1) {
-				des1.encrypt(cipher, 0, bce, 0);
-				des2.decrypt(bce, 0, bce, 0);
-				des3.encrypt(bce, 0, bce, 0);
+				bce    = encrypt3DES_EDE(cipher);
 				cipher = xor(bce, plain);
 				os.write(cipher);
-				plain = new byte[8];
+				plain  = new byte[8];
 			}
 		}
 	}
@@ -74,24 +68,26 @@ public class TripleDES {
 				InputStream is = new BufferedInputStream(new FileInputStream(fileIn));
 				OutputStream os = new BufferedOutputStream(new FileOutputStream(fileOut));
 		) {
-			DES des1 = new DES(_key1);
-			DES des2 = new DES(_key2);
-			DES des3 = new DES(_key3);
-			
 			byte[] buffer = new byte[8];
 			byte[] cipher = Arrays.copyOf(_initial, _initial.length);
 			byte[] bce = new byte[8];
 			byte[] plain = new byte[8];
 			while(is.read(buffer) != -1) {
-				des1.encrypt(cipher, 0, bce, 0);
-				des2.decrypt(bce, 0, bce, 0);
-				des3.encrypt(bce, 0, bce, 0);
-				plain = xor(bce, buffer);
+				bce    = encrypt3DES_EDE(cipher);
+				plain  = xor(bce, buffer);
 				cipher = buffer;
 				os.write(plain);
 				buffer = new byte[8];
 			}
 		}
+	}
+	
+	private byte[] encrypt3DES_EDE(byte[] block) {
+		byte[] out = new byte[block.length];
+		_des1.encrypt(block, 0, out, 0);
+		_des2.decrypt(out, 0, out, 0);
+		_des3.encrypt(out, 0, out, 0);
+		return out;
 	}
 	
 	private byte[] xor(byte[] a, byte[] b) {
