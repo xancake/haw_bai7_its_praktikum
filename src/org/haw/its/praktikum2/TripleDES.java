@@ -152,9 +152,9 @@ public class TripleDES {
 			}
 		}
 		
-		File keyFile    = new File(ClassLoader.getSystemClassLoader().getResource(keyFileStr).toURI());
-		File inputFile  = new File(ClassLoader.getSystemClassLoader().getResource(inputFileStr).toURI());
-		File outputFile = new File(outputFileStr);
+		File keyFile    = new File(ClassLoader.getSystemClassLoader().getResource("praktikum2/" + keyFileStr).toURI());
+		File inputFile  = new File(ClassLoader.getSystemClassLoader().getResource("praktikum2/" + inputFileStr).toURI());
+		File outputFile = new File("res/praktikum2/" + outputFileStr);
 		TripleDES tripleDES = TripleDES.createFromKeyFile(keyFile);
 		if("encrypt".equals(encrypt)) {
 			tripleDES.encrypt(inputFile, outputFile);
