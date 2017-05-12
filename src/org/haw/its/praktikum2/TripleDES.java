@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Scanner;
+import org.haw.its.util.ByteUtils;
 
 public class TripleDES {
 	private final DES _des1;
@@ -53,7 +54,7 @@ public class TripleDES {
 			byte[] bce = new byte[8];
 			while(is.read(plain) != -1) {
 				bce    = encrypt3DES_EDE(cipher);
-				cipher = xor(bce, plain);
+				cipher = ByteUtils.xor(bce, plain);
 				os.write(cipher);
 				plain  = new byte[8];
 			}
@@ -74,7 +75,7 @@ public class TripleDES {
 			byte[] plain = new byte[8];
 			while(is.read(buffer) != -1) {
 				bce    = encrypt3DES_EDE(cipher);
-				plain  = xor(bce, buffer);
+				plain  = ByteUtils.xor(bce, buffer);
 				cipher = buffer;
 				os.write(plain);
 				buffer = new byte[8];
@@ -87,17 +88,6 @@ public class TripleDES {
 		_des1.encrypt(block, 0, out, 0);
 		_des2.decrypt(out, 0, out, 0);
 		_des3.encrypt(out, 0, out, 0);
-		return out;
-	}
-	
-	private byte[] xor(byte[] a, byte[] b) {
-		if(a.length != b.length) {
-			throw new IllegalArgumentException("");
-		}
-		byte[] out = new byte[a.length];
-		for(int i=0; i<a.length; i++) {
-			out[i] = (byte)(a[i] ^ b[i]);
-		}
 		return out;
 	}
 	
