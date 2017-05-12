@@ -20,6 +20,9 @@ public class RSAKeyCreator {
 		Key publicKey   = x509.translateKey(keyPair.getPublic());
 		Key privateKey  = pkcs8.translateKey(keyPair.getPrivate());
 		
+		// TODO: X.509-encode publicKey
+		// TODO: PKCS8-encode privateKey
+		
 		KeyFileWriter keyFileWriter = new KeyFileWriter("res/praktikum3");
 		keyFileWriter.writeKeyFile(user, publicKey.getEncoded(), "pub");
 		keyFileWriter.writeKeyFile(user, privateKey.getEncoded(), "prv");
