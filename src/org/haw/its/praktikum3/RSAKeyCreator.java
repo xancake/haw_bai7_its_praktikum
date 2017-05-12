@@ -1,9 +1,9 @@
 package org.haw.its.praktikum3;
 
-import java.security.Key;
-import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Scanner;
 import org.haw.its.praktikum3.fileio.KeyFileWriter;
 
@@ -13,15 +13,12 @@ public class RSAKeyCreator {
 		
 		KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
 		keyGenerator.initialize(2048);
-		KeyFactory x509  = KeyFactory.getInstance("X.509");
-		KeyFactory pkcs8 = KeyFactory.getInstance("PKCS8");
 		
 		KeyPair keyPair = keyGenerator.generateKeyPair();
-		Key publicKey   = x509.translateKey(keyPair.getPublic());
-		Key privateKey  = pkcs8.translateKey(keyPair.getPrivate());
+		PublicKey publicKey = keyPair.getPublic();
+		PrivateKey privateKey = keyPair.getPrivate();
 		
-		// TODO: X.509-encode publicKey
-		// TODO: PKCS8-encode privateKey
+		// Keys sind standardmäßig in den Formaten X.509 bzw. PKCS8
 		
 		KeyFileWriter keyFileWriter = new KeyFileWriter("res/praktikum3");
 		keyFileWriter.writeKeyFile(user, publicKey.getEncoded(), "pub");
