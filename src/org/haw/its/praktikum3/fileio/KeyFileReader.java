@@ -8,26 +8,17 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class KeyFileReader {
-	private File _baseFolder;
-	
+public class KeyFileReader extends BaseFolderFileWriter_A {
 	public KeyFileReader() throws FileNotFoundException {
-		this(".");
+		super();
 	}
 	
 	public KeyFileReader(String baseFolder) throws FileNotFoundException {
-		this(new File(Objects.requireNonNull(baseFolder)));
+		super(baseFolder);
 	}
 	
 	public KeyFileReader(File baseFolder) throws FileNotFoundException {
-		if(!Objects.requireNonNull(baseFolder).exists()) {
-			throw new FileNotFoundException("Der angegebene Basisordner konnte nicht gefunden werden: " + baseFolder.getAbsolutePath());
-		}
-		_baseFolder = baseFolder;
-	}
-	
-	public File getBaseFolder() {
-		return _baseFolder;
+		super(baseFolder);
 	}
 	
 	/**
@@ -44,7 +35,7 @@ public class KeyFileReader {
 		checkString(user);
 		checkString(fileSuffix);
 		
-		File inputFile = new File(_baseFolder, user + "." + fileSuffix + ".txt");
+		File inputFile = new File(getBaseFolder(), user + "." + fileSuffix + ".txt");
 		try(DataInputStream is = new DataInputStream(new FileInputStream(inputFile))) {
 			int len = is.readInt();
 			byte[] userBytes = new byte[len];

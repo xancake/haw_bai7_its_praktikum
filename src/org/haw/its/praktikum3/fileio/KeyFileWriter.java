@@ -8,26 +8,17 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class KeyFileWriter {
-	private File _baseFolder;
-	
+public class KeyFileWriter extends BaseFolderFileWriter_A {
 	public KeyFileWriter() throws FileNotFoundException {
-		this(".");
+		super();
 	}
 	
 	public KeyFileWriter(String baseFolder) throws FileNotFoundException {
-		this(new File(Objects.requireNonNull(baseFolder)));
+		super(baseFolder);
 	}
 	
 	public KeyFileWriter(File baseFolder) throws FileNotFoundException {
-		if(!Objects.requireNonNull(baseFolder).exists()) {
-			throw new FileNotFoundException("Der angegebene Basisordner konnte nicht gefunden werden: " + baseFolder.getAbsolutePath());
-		}
-		_baseFolder = baseFolder;
-	}
-	
-	public File getBaseFolder() {
-		return _baseFolder;
+		super(baseFolder);
 	}
 	
 	/**
@@ -44,7 +35,7 @@ public class KeyFileWriter {
 		Objects.requireNonNull(key);
 		checkString(fileSuffix);
 		
-		File outputFile = new File(_baseFolder, user + "." + fileSuffix + ".txt");
+		File outputFile = new File(getBaseFolder(), user + "." + fileSuffix + ".txt");
 		try (DataOutputStream os = new DataOutputStream(new FileOutputStream(outputFile))) {
 			os.writeInt(user.length());
 			os.write(user.getBytes());
