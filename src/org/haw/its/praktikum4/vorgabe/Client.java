@@ -14,11 +14,13 @@ public class Client extends Object {
 	}
 
 	public boolean login(String userName, char[] password) {
-		/* TODO */
+		// TODO
+		return false;
 	}
 
 	public boolean showFile(Server fileServer, String filePath) {
-		/* TODO */
+		// TODO
+		return false;
 	}
 
 	/* *********** Hilfsmethoden **************************** */

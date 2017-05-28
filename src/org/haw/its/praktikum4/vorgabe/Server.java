@@ -31,7 +31,8 @@ public class Server {
 	}
 
 	public boolean requestService(Ticket srvTicket, Auth srvAuth, String command, String parameter) {
-			/* TODO */
+		// TODO
+		return false;
 	}
 
 	/* *********** Services **************************** */

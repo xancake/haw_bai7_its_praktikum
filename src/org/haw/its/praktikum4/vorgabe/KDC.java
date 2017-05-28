@@ -89,7 +89,8 @@ public class KDC extends Object {
 	 */
 
 	public TicketResponse requestServerTicket(Ticket tgsTicket, Auth tgsAuth, String serverName, long nonce) {
-		/* TODO */
+		// TODO
+		return null;
 	}
 
 	/* *********** Hilfsmethoden **************************** */
