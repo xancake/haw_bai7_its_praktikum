@@ -82,9 +82,7 @@ public class TicketResponse {
 	}
 
 	public void printError(String message) {
-		System.out.println("+++++++++++++++++++");
-		System.out.println("+++++++++++++++++++ Fehler +++++++++++++++++++ " + message + "! TicketResponse-Key: " + myResponseKey);
-		System.out.println("+++++++++++++++++++");
+		throw new IllegalArgumentException("+++++++++++++++++++ Fehler +++++++++++++++++++ " + message + "! TicketResponse-Key: " + myResponseKey);
 	}
 
 	public void print() {

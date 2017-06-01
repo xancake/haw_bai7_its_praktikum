@@ -13,13 +13,48 @@ public class Client extends Object {
 		myKDC = kdc;
 	}
 
+	// XXX: Angepasst
 	public boolean login(String userName, char[] password) {
-		// TODO
+		System.out.println("[C] Einloggen...");
+		long nonce = generateNonce();
+		TicketResponse response = myKDC.requestTGSTicket(userName, "myTGS", nonce);
+		if(response != null) {
+			if(!response.isEncrypted()) {
+				throw new IllegalArgumentException("Das Response ist nicht verschlüsselt!");
+			}
+			if(!response.decrypt(generateSimpleKeyFromPassword(password))) {
+				throw new IllegalArgumentException("Response konnte nicht entschlüsselt werden!");
+			}
+			if(response.getNonce() != nonce) {
+				throw new IllegalArgumentException("Nonce nicht gleich, eigener: " + nonce + ", server: " + response.getNonce() + "!");
+			}
+			System.out.println("[C] Login erfolgreich!");
+			currentUser = userName;
+			tgsTicket = response.getResponseTicket();
+			tgsSessionKey = response.getSessionKey();
+			return true;
+		}
 		return false;
 	}
 
+	// XXX: Angepasst
 	public boolean showFile(Server fileServer, String filePath) {
-		// TODO
+		System.out.println("[C] Request Service von " + fileServer.getName());
+		long nonce = generateNonce();
+		Auth auth = new Auth(currentUser, System.currentTimeMillis());
+		auth.encrypt(tgsSessionKey);
+		TicketResponse response = myKDC.requestServerTicket(tgsTicket, auth, fileServer.getName(), nonce);
+		if(response != null) {
+			if(!response.decrypt(tgsSessionKey)) {
+				throw new IllegalArgumentException("Response konnte nicht entschlüsselt werden!");
+			}
+			if(response.getNonce() != nonce) {
+				throw new IllegalArgumentException("Nonce nicht gleich, eigener: " + nonce + ", server: " + response.getNonce() + "!");
+			}
+			Auth serverAuth = new Auth(currentUser, System.currentTimeMillis());
+			serverAuth.encrypt(response.getSessionKey());
+			return fileServer.requestService(response.getResponseTicket(), serverAuth, Server.COMMAND_SHOW_FILE, filePath);
+		}
 		return false;
 	}
 

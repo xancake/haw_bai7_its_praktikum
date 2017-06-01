@@ -114,9 +114,7 @@ public class Ticket {
 	}
 
 	public void printError(String message) {
-		System.out.println("+++++++++++++++++++");
-		System.out.println("+++++++++++++++++++ Fehler +++++++++++++++++++ " + message + "! Ticket-Key: " + myTicketKey);
-		System.out.println("+++++++++++++++++++");
+		throw new IllegalArgumentException("+++++++++++++++++++ Fehler +++++++++++++++++++ " + message + "! Ticket-Key: " + myTicketKey);
 	}
 
 	/**

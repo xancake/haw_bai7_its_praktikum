@@ -7,6 +7,8 @@ import java.io.*;
  * Simulation einer Kerberos-Session mit Zugriff auf einen Fileserver Server-Klasse
  */
 public class Server {
+	public static final String COMMAND_SHOW_FILE = "show-file";
+	
 	private final long fiveMinutesInMillis = 300000; // 5 Minuten in Millisekunden
 
 	private String myName;
@@ -30,8 +32,29 @@ public class Server {
 		System.out.println("Server " + myName + " erfolgreich registriert bei KDC " + myKDC.getName() + " mit ServerKey " + myKey);
 	}
 
+	// XXX: Angepasst
 	public boolean requestService(Ticket srvTicket, Auth srvAuth, String command, String parameter) {
-		// TODO
+		System.out.println("[S] Request Service " + command);
+		
+		srvTicket.decrypt(myKey);
+		srvAuth.decrypt(srvTicket.getSessionKey());
+		
+		if(!timeValid(srvAuth.getCurrentTime(), srvTicket.getStartTime(), srvTicket.getEndTime())) {
+			throw new IllegalArgumentException("Das Server-Ticket ist nicht mehr gültig!");
+		}
+		if(!srvTicket.getClientName().equals(srvAuth.getClientName())) {
+			throw new IllegalArgumentException("Der Benutzer aus dem Ticket passt nicht zu der Authentifikation!");
+		}
+		if(!myName.equals(srvTicket.getServerName())) {
+			throw new IllegalArgumentException("Der angeforderte Server ist nicht dieser Server!");
+		}
+
+		System.out.println("[S] Service " + command + " wird ausgeführt:");
+		if(COMMAND_SHOW_FILE.equals(command)) {
+			return showFile(parameter);
+		}
+		
+		System.out.println("Ungültiger Befehl '" + command + "' angefordert!");
 		return false;
 	}
 
@@ -71,8 +94,7 @@ public class Server {
 	/**
 	 * Wenn die aktuelle Zeit innerhalb der übergebenen Zeitgrenzen liegt, wird true zurückgegeben
 	 */
-	private boolean timeValid(long lowerBound, long upperBound) {
-		long currentTime = (new Date()).getTime(); // Anzahl mSek. seit 1.1.1970
+	private boolean timeValid(long currentTime, long lowerBound, long upperBound) {
 		if (currentTime >= lowerBound && currentTime <= upperBound) {
 			return true;
 		} else {

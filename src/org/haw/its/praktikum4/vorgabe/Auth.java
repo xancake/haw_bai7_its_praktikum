@@ -75,9 +75,7 @@ public class Auth extends Object {
 	}
 
 	public void printError(String message) {
-		System.out.println("+++++++++++++++++++");
-		System.out.println("+++++++++++++++++++ Fehler +++++++++++++++++++ " + message + "! Auth-Key: " + myAuthKey);
-		System.out.println("+++++++++++++++++++");
+		throw new IllegalArgumentException("+++++++++++++++++++ Fehler +++++++++++++++++++ " + message + "! Auth-Key: " + myAuthKey);
 	}
 
 	public void print() {

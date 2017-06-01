@@ -88,9 +88,37 @@ public class KDC extends Object {
 	 * *********** TGS-Modul: Server - Ticketanfrage ****************************
 	 */
 
+	// XXX: Angepasst
 	public TicketResponse requestServerTicket(Ticket tgsTicket, Auth tgsAuth, String serverName, long nonce) {
-		// TODO
-		return null;
+		System.out.println("[KDC|TGS] Request Server-Ticket für " + serverName);
+		
+		tgsTicket.decrypt(tgsKey);
+		tgsAuth.decrypt(tgsTicket.getSessionKey());
+		
+		if(!timeValid(tgsAuth.getCurrentTime(), tgsTicket.getStartTime(), tgsTicket.getEndTime())) {
+			throw new IllegalArgumentException("Das TGS-Ticket ist nicht mehr gültig!");
+		}
+		if(!user.equals(tgsAuth.getClientName())) {
+			throw new IllegalArgumentException("Der Benutzer ist nicht gültig!");
+		}
+		if(!tgsAuth.getClientName().equals(tgsTicket.getClientName())) {
+			throw new IllegalArgumentException("Der Benutzer aus dem Ticket passt nicht zur Authentifikation!");
+		}
+		if(!serverName.equals(this.serverName)) {
+			throw new IllegalArgumentException("Der gewünschte Server ist nicht bekannt!");
+		}
+		
+		long serverSessionKey = generateSimpleKey(); // K(C,S)
+		long currentTime = new Date().getTime(); // Anzahl mSek. seit 1.1.1970
+		
+		Ticket ticket = new Ticket(tgsTicket.getClientName(), serverName, currentTime, currentTime+fiveMinutesInMillis, serverSessionKey);
+		ticket.encrypt(getServerKey(serverName));
+		
+		TicketResponse response = new TicketResponse(serverSessionKey, nonce, ticket);
+		response.encrypt(tgsTicket.getSessionKey());
+		
+		System.out.println("[KDC|TGS] Server-Ticket für " + serverName + " versandt");
+		return response;
 	}
 
 	/* *********** Hilfsmethoden **************************** */
@@ -127,8 +155,7 @@ public class KDC extends Object {
 		return (long)(100000000 * Math.random());
 	}
 
-	boolean timeValid(long lowerBound, long upperBound) {
-		long currentTime = (new Date()).getTime(); // Anzahl mSek. seit 1.1.1970
+	boolean timeValid(long currentTime, long lowerBound, long upperBound) {
 		if (currentTime >= lowerBound && currentTime <= upperBound) {
 			return true;
 		} else {

@@ -1,5 +1,7 @@
 package org.haw.its.praktikum4.vorgabe;
 
+import java.io.File;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -34,7 +36,7 @@ public class KerberosSim {
 		return null;
 	}
 
-	public static void main(String args[]) {
+	public static void main(String args[]) throws URISyntaxException {
 		// Simulation einer Benutzer-Session: Anmeldung und Zugriff auf Fileserver
 
 		// -------- Start Initialisierung des Systems ------------------
@@ -42,7 +44,7 @@ public class KerberosSim {
 		char[] password = { 'S', 'e', 'c', 'r', 'e', 't', '!' };
 		String serverName = "myFileserver";
 		String tgsName = "myTGS";
-		String filePath = "C:/Temp/ITS.txt";
+		String filePath = new File(ClassLoader.getSystemResource("praktikum4/test.txt").toURI()).getAbsolutePath();
 
 		KerberosSim thisSession = new KerberosSim();
 
