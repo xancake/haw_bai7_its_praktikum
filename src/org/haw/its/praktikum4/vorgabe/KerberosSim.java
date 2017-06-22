@@ -26,6 +26,7 @@ public class KerberosSim {
 
 	/**
 	 * Passworteingabe über modalen Dialog.
+	 * 
 	 * @return Liefert ein Passwort oder null bei Abbruch durch den Benutzer
 	 */
 	public char[] readPasswd(String userName) {
@@ -37,7 +38,8 @@ public class KerberosSim {
 	}
 
 	public static void main(String args[]) throws URISyntaxException {
-		// Simulation einer Benutzer-Session: Anmeldung und Zugriff auf Fileserver
+		// Simulation einer Benutzer-Session: Anmeldung und Zugriff auf
+		// Fileserver
 
 		// -------- Start Initialisierung des Systems ------------------
 		String userName = "axz467";
@@ -54,7 +56,7 @@ public class KerberosSim {
 
 		/* -------- Benutzersession simulieren ------ */
 		// Passwort vom Benutzer holen
-		System.out.println("Starte Login-Session für Benutzer: " + userName);
+		System.out.println("[Simulation] Starte Login-Session für Benutzer: " + userName);
 		password = thisSession.readPasswd(userName);
 		if (password != null) {
 
@@ -67,7 +69,7 @@ public class KerberosSim {
 			if (!loginOK) {
 				System.out.println("Login fehlgeschlagen!");
 			} else {
-				System.out.println("Login erfolgreich!\n");
+				 System.out.println("[Simulation] Login erfolgreich!\n");
 
 				// Zugriff auf Fileserver
 				boolean serviceOK = thisSession.myClient.showFile(thisSession.myFileserver, filePath);

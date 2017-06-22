@@ -129,7 +129,7 @@ public class KDC extends Object {
 	 */
 	private long getServerKey(String sName) {
 		if (sName.equalsIgnoreCase(serverName)) {
-			System.out.println("Serverkey ok");
+			System.out.println("[KDC|TGS] Serverkey ok");
 			return serverKey;
 		} else {
 			System.out.println("Serverkey unbekannt!!!!");
