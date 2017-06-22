@@ -95,7 +95,10 @@ public class KDC extends Object {
 		tgsTicket.decrypt(tgsKey);
 		tgsAuth.decrypt(tgsTicket.getSessionKey());
 		
-		if(!timeValid(tgsAuth.getCurrentTime(), tgsTicket.getStartTime(), tgsTicket.getEndTime())) {
+		if(!timeFresh(tgsAuth.getCurrentTime())) {
+			throw new IllegalArgumentException("Die Zeit aus der Authentication weicht zu sehr von der aktuellen Zeit ab!");
+		}
+		if(!timeValid(System.currentTimeMillis(), tgsTicket.getStartTime(), tgsTicket.getEndTime())) {
 			throw new IllegalArgumentException("Das TGS-Ticket ist nicht mehr gültig!");
 		}
 		if(!user.equals(tgsAuth.getClientName())) {

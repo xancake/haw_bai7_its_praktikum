@@ -39,8 +39,11 @@ public class Server {
 		srvTicket.decrypt(myKey);
 		srvAuth.decrypt(srvTicket.getSessionKey());
 		
-		if(!timeValid(srvAuth.getCurrentTime(), srvTicket.getStartTime(), srvTicket.getEndTime())) {
-			throw new IllegalArgumentException("Das Server-Ticket ist nicht mehr gültig!");
+		if(!timeFresh(srvAuth.getCurrentTime())) {
+			throw new IllegalArgumentException("Die Zeit aus der Authentication weicht zu sehr von der aktuellen Zeit ab!");
+		}
+		if(!timeValid(System.currentTimeMillis(), srvTicket.getStartTime(), srvTicket.getEndTime())) {
+			throw new IllegalArgumentException("Das TGS-Ticket ist nicht mehr gültig!");
 		}
 		if(!srvTicket.getClientName().equals(srvAuth.getClientName())) {
 			throw new IllegalArgumentException("Der Benutzer aus dem Ticket passt nicht zu der Authentifikation!");
